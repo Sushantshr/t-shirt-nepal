@@ -12,7 +12,7 @@ export async function GET() {
 
   const orders = await prisma.order.findMany({
     where: {
-      userId: session.user.id,
+      userId: session.user?.id,
     },
   });
 
@@ -28,10 +28,10 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const { category, size, quantity, totalAmount, paidAmount } = body;
-
+  console.log(session);
   const order = await prisma.order.create({
     data: {
-      userId: session.user.id,
+      userId: session.user?.id,
       category,
       size,
       quantity,

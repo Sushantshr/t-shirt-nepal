@@ -12,7 +12,8 @@ model User {
   name          String?
   email         String    @unique
   password      String
-  role          Role      @default(USER)
+  role          Role?     @relation(fields: [roleId], references: [id])
+  roleId        Int?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   orders        Order[]
@@ -34,12 +35,12 @@ model Order {
 }
 
 model Role {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  users       User[]
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  users         User[]
 }
 
 enum UserRole {

@@ -4,6 +4,32 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import NextAuth from "next-auth/next";
+import { Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
+
+// Add these type declarations at the top of your file
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      role: string | null;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
+  }
+  interface User {
+    id: string;
+    role: string | null;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    role: string | null;
+  }
+}
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -36,7 +62,6 @@ export const authOptions: NextAuthOptions = {
           credentials.password,
           user.password
         );
-
         if (!isPasswordValid) {
           return null;
         }
@@ -45,7 +70,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role.name,
+          role: user.role?.name || null,
         };
       }
     })
@@ -54,12 +79,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
         session.user.role = token.role;
+        session.user.id = token.id;
       }
       return session;
     },
